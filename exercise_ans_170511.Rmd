@@ -15,7 +15,7 @@ nine_nine = function(){
       mat[i,j] = paste(i,"*",j,"= ",i*j)
     }
   }
-  mat
+  return(mat)
 }
 
 nine_nine2 = function(){
@@ -23,6 +23,12 @@ nine_nine2 = function(){
   mat2 = matrix(1:9, nrow = 1);
   mat = mat1 %*% mat2;
   mat
+}
+nine_nine3 = function(){
+  mat1 = matrix(1:9, nrow = 9);
+  mat2 = t(mat1)
+  mat = mat1 %*%mat2
+  return(mat)
 }
 ```
 

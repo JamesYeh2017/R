@@ -183,7 +183,7 @@ height_vec[height_vec > 175] #condition (boolean vector)
 ##**Object用[] 來filter**
 ```
 
-##seq() & rep() & paste()
+##seq()連續數列 & rep()重覆 & paste()合併
 ```{R, echo=TRUE}
 1:20
 seq(1,20)  #連續數列
@@ -347,13 +347,13 @@ str(iris)
 ##File read and write
 ```{R}
 getwd()
-setwd("C:/riii")  #設定目前路徑
-tw2330 = read.csv("data/2330.csv", header=TRUE)
+setwd("C:/riii")  #設定目前路徑  setWorkingDirestory
+tw2330 = read.csv("data/2330.csv", header=TRUE)   #csv default use "," to sep
 
-test.data = read.table("data/match.txt" ,header = TRUE, sep="|")
+test.data = read.table("data/match.txt" ,header = FALSE, sep="|")  
 
 #table
-write.table(test.data, file = "data/test.txt" , sep = " ")
+write.table(test.data, file = "data/test.txt" , sep = " ")  #(obj, path, sep)
 #csv
 write.csv(test.data, file = "data/test.csv")
 
@@ -361,15 +361,17 @@ write.csv(test.data, file = "data/test.csv")
 
 ##List
 ```{R}
-item = list(thing="hat", size=8.25)
+item = list(thing="hat", size=8.25)   #(elementName, elementVal)
 item
 
 test = list(name="Toby", score = c(87,57,72))
 test$score
 test$score[2]
 
-flower= list(title="iris dataset", data= iris)
+flower= list(title="iris dataset", data= iris)  #(elementName, elementVal)
 class(flower)
 class(flower$data)
+class(flower$data$Sepal.Length)
+flower$data$Sepal.Length[1]   #numeric
 flower$data[1,"Sepal.Width"]
 ```
