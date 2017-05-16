@@ -9,24 +9,32 @@ output: html_document
 
 ##Probability
 ```{R}
+
 Sys.setlocale("LC_ALL","C")
 
-sample(1:10)
+sample(1:10)   #x:1~10  隨機從x取值
 sample(1:10, size = 5)
 sample(c(0,1), size= 10, replace = T)
 sample.int(20, 12) # 兩個參數都要放整數，此例為取1:20中的12個不重複樣本
 
-coins = c("heads", "tails")
+coins = c("heads", "tails")                     #古典機率   可能結果
 fair_coin = sample(coins, size = 10000, replace = TRUE)
-table(fair_coin)
-table(fair_coin) / length(fair_coin)
+table(fair_coin)                   #次數分類表
+table(fair_coin) / length(fair_coin)            #次數比機率   樣本數越大會趨向古典機率
+#prob=c(0.8,0.2)  args調整可能結果(樣本數不一樣)
 
 #連續投擲硬幣3次
-flipping_coin = function(n){sample(0:1,size=n,replace=T)}
+flipping_coin = function(n){sample(0:1,size=n,replace=T)}   #flipping_coin(100)
 flipping_coin(100)
 flipping_coin_three_times = flipping_coin(100) + flipping_coin(100) + flipping_coin(100)
 flipping_coin_three_times
-table(flipping_coin_three_times)
+table(flipping_coin_three_times)    #次數分類表  0  1  2  3
+
+flipping_coin2 = function(n){table(sample(0:1,size=n,replace=T)+sample(0:1,size=n,replace=T)+sample(0:1,size=n,replace=T)) / n}  
+#length(n) = 1  計算向量元素的長度
+flipping_coin2(100)      #  隨機機率分配模型
+
+#隨機變數的機率分配
 barplot(table(flipping_coin_three_times))
 
 ```
@@ -36,15 +44,21 @@ barplot(table(flipping_coin_three_times))
 #binomial distribution (size=1 => bernoulli distribution) 
 #進行n次二項實驗(成功;失敗)成功的次數分佈
 
-#產生n個該機率分配的樣本點
-b = rbinom(n = 20,size= 10,prob= 0.5)
+#f(x)~Bin(n,p)  f(x)~Bin(size,古典機率) 
+#二項式分配  => 機率分配圖(p.d.f)  => 累積機率圖(C.D.F)
+
+b = rbinom(n = 20,size= 10,prob= 0.5)  #n=樣本數   size=實驗次數
+#產生n=20個該機率分配的樣本點
 table(b)
 barplot(table(b))
 
 barplot(table(rbinom(n=100, size=3, prob=0.5))) #連續投3次硬幣例子
 
 barplot(table(rbinom(100, 1, 0.5)))
-#機率分配的高度(間斷分配 =>　該事件發生機率；連續分配 => y軸高度，無特別意義)
+#機率分配的高度(間斷分配 =>　該事件發生機率；連續分配 => y軸高度無特別意義,機率是面積)
+
+#間斷型隨機機率  
+#一個古典機率=0.5  實驗3次  出現0,1,2,3分別機率
 dbinom(x = 0,size = 3, prob= 0.5)
 dbinom(x = 1,size = 3, prob= 0.5)
 dbinom(x = 2,size = 3, prob= 0.5)
@@ -56,7 +70,7 @@ pbinom(q = 1,size = 3,prob = 0.5)
 pbinom(q = 2,size = 3,prob = 0.5)
 pbinom(q = 3,size = 3,prob = 0.5)
 
-#pbinom的反函數
+#pbinom的反函數   find   x
 qbinom(p = 0,size = 3,prob = 0.5)
 qbinom(p = 0.125,size = 3,prob = 0.5)
 qbinom(p = 0.5,size = 3,prob = 0.5)
@@ -68,17 +82,21 @@ qbinom(p = 1,size = 3,prob = 0.5)
 ##常見連續機率分配
 ```{R}
 #normal distribution(標準常態分佈=> mean=0 , sd=1)
-rnorm(n=1000,mean = 3,sd = 2)
+#X~N(u,母體變異數)
+rnorm(n=1000,mean = 3,sd = 2) #在R裡面常態分配參數mean平均數  sd標準差
 hist(rnorm(100000,mean = 3,sd = 2))
-
+#連續型隨機機率 = 累積機率
 
 par(mfrow=c(3,1))
 xlimits = range(-10,10)
-#比較mean對常態分布的影響
+
+#比較sd對常態分布的影響
+#cd越大  data越分散
 hist(rnorm(10000,mean = 0,sd = 1),xlim=xlimits)
 hist(rnorm(10000,mean = 0,sd = 2),xlim=xlimits)
 hist(rnorm(10000,mean = 0,sd = 3),xlim=xlimits)
-#比較sd對常態分布的影響
+
+#比較mean對常態分布的影響
 hist(rnorm(10000,mean = 0,sd = 1),xlim=xlimits)
 hist(rnorm(10000,mean = 3,sd = 1),xlim=xlimits)
 hist(rnorm(10000,mean = 6,sd = 1),xlim=xlimits)
@@ -89,9 +107,9 @@ curve(dnorm(x,mean=0,sd=1),-3,3)
 #常態累積機率圖
 curve(pnorm(x,mean=0,sd=1),-3,3)
 
-# 給定上下界(-1,1)求累積機率 = p(x<1) - p(x<-1)
-pnorm(1) - pnorm(-1)
-
+# 給定上下界(0,1)求累積機率 = p(x<1) - p(x<0)
+pnorm(1) - pnorm(0)  #P(0<= x <=1)
+#pnorm(1,mean=0,sd=1) - pnorm(0,mean=0,sd=1)
 ```
 
 ##抽樣分配
@@ -103,12 +121,14 @@ hist(area)
 
 #檢查資料是否為常態
 #第一種方式: qqplot
-qqnorm(area)
-qqline(area,col='red')
+qqnorm(area)             #資料點與常態分布值
+qqline(area,col='red')    #45度線
+
 #第二種方式: shapiro test
 # 檢定是否符合常態分配。
 #虛無假設：資料為常態分配，若p值<0.05則拒絕虛無假設
-shapiro.test(area) 
+shapiro.test(area) #p>0.05常態分配
+#拒絕虛無假設  對立假設==>成立   不是常態分配
 
 a = rnorm(1000,mean=0,sd=1)
 qqnorm(a)
@@ -122,35 +142,35 @@ shapiro.test(b)
 
 #驗證中央極限定理為真
 sample_means10 = rep(NA, 5000)
-sample_means50 = rep(NA, 5000)
+sample_means50 = rep(NA, 5000)   #一個母體取50樣本的算平均數的5000向量
 sample_means100 = rep(NA, 5000)
 
 for (i in 1:5000){
-    samp = sample(area, 10,replace=F)
-    sample_means10[i] = mean(samp)
-    samp = sample(area, 50)
-    sample_means50[i] = mean(samp)
-    samp = sample(area, 100)
-    sample_means100[i] = mean(samp)
+  samp = sample(area, 10,replace=F)#母體取10樣本
+  sample_means10[i] = mean(samp)  #算平均數後  放回向量
+  samp = sample(area, 50)
+  sample_means50[i] = mean(samp)
+  samp = sample(area, 100)
+  sample_means100[i] = mean(samp)
 }
 
 par(mfrow = c(3, 1))
-xlimits = range(sample_means10)
-hist(sample_means10, breaks = 20, xlim = xlimits)
+xlimits = range(sample_means10)  #區間
+hist(sample_means10, breaks = 20, xlim = xlimits)  #breaks 區間密度
 hist(sample_means50, breaks = 20, xlim = xlimits)
-hist(sample_means100, breaks = 20, xlim = xlimits)
+hist(sample_means100, breaks = 20, xlim = xlimits)  #n=100 的樣本抽樣分配   變異數隨樣本數增加而變小
 
-pop_mean = mean(area)
-pop_var = var(area)
+pop_mean = mean(area)   #母體平均數
+pop_var = var(area)    #母體變異數
 
-sample_mean = mean(sample_means50)
-sample_var = var(sample_means50)
+sample_mean = mean(sample_means50)  #樣本平均數
+sample_var = var(sample_means50)    #樣本變異數
 pop_mean
 sample_mean
 
-pop_var
-sample_var
-pop_var / sample_var
+pop_var       #母體變異數
+sample_var    #樣本變異數
+pop_var / sample_var   #pop_var / n = sample_var
 
 
 # 各種機率分配的中央極限定裡
@@ -158,7 +178,7 @@ CLT = function(x) {
   op<-par(mfrow=c(2,2)) # 設為 2*2 的四格繪圖版
   hist(x, breaks=50)     # 繪製 x 序列的直方圖 (histogram)。
   m2 <- matrix(x, nrow=2 )  # 將 x 序列分為 2*k 兩個一組的矩陣 m2。
-  xbar2 <- apply(m2, 2, mean)   # 取每兩個一組的平均值 (x1+x2)/2 放入 xbar2 中。
+  xbar2 <- apply(m2, 2, mean)   # 取每兩個一組的平均值 (x1+x2)/2 放入 xbar2 中。   col平均
   hist(xbar2, breaks=50)     # 繪製 xbar2 序列的直方圖 (histogram)。
   m10 <- matrix(x, nrow=10 )   # 將 x 序列分為 10*k 兩個一組的矩陣 m10。
   xbar10 <- apply(m10, 2, mean) # 取每10個一組的平均值 (x1+..+x10)/10 放入 xbar10 中。
@@ -179,24 +199,25 @@ CLT(rgeom(n=100000, prob = 0.7)) # 用參數為 p=0.5 的幾何分布驗證中�
 ```{R}
 population = ames$Gr.Liv.Area
 mean(population)
+
+#z分配求算信賴區間   **已知母體變異數**
 n=50
+samp = sample(population, n)     #樣本
+sample_mean = mean(samp)         #樣本平均數
 
-#z分配求算信賴區間
-samp = sample(population, n)
-sample_mean = mean(samp)
+sde = sd(population)/sqrt(n)     #sde(標準誤差) = 母體標準差 / sqrt(n)
 
-sde = sd(population)/sqrt(n)
-
-lower = sample_mean + qnorm(0.025) * sde
+lower = sample_mean + qnorm(0.025) * sde   #常態分配的x*標準誤差
 upper = sample_mean + qnorm(0.975) * sde
 c(lower,upper)
-
 #也可用以下方式計算(不作標準化)
 c(qnorm(0.025,sample_mean,sde),qnorm(0.975,sample_mean,sde))
+#qnorm(prob,樣本平均數,標準誤差)
 
-#如果母體變異數未知，以樣本變異數來估計母體變異數，並改用t分配
+#如果**母體變異數未知**，以樣本變異數來估計母體變異數，並改用t分配
 n=10
-sde_t = sd(samp) / sqrt(n)
+samp = sample(population, n)
+sde_t = sd(samp) / sqrt(n)          # sde_t(標準誤差) = 樣本標準差 / sqrt(n) 
 lower_t = sample_mean + qt(p=0.025,df=n-1) * sde_t
 upper_t = sample_mean + qt(p=0.975,df=n-1) * sde_t
 c(lower_t,upper_t)
@@ -205,7 +226,7 @@ c(lower_t,upper_t)
 curve(dnorm(x), -5, 5, col="black")
 curve(dt(x, df=2), -5, 5, col="green", add=T)
 curve(dt(x, df=10), -5, 5, col="red", add=T)
-curve(dt(x, df=200), -5, 5, col="yellow", add=T)
+curve(dt(x, df=200), -5, 5, col="yellow", add=T)  #自由度越大 趨向z分配
 ```
 
 ##Testing hypothesis

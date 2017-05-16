@@ -47,6 +47,6 @@ sum_of_two_dice = rolling_dice(10000) + rolling_dice(10000)
 sum_of_two_dice
 table(sum_of_two_dice)
 barplot(table(sum_of_two_dice))
-table(sum_of_two_dice) / length(sum_of_two_dice)
+table(sum_of_two_dice) / length(sum_of_two_dice)  #機率模型  隨機分配
 ```
 
