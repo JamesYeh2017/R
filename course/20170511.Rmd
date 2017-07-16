@@ -1,0 +1,359 @@
+---
+title: "R_0511"
+author: "York Lin"
+date: "2017年05月11日"
+output: html_document
+---
+##Flow Control
+```{R}
+
+Sys.setlocale("LC_ALL","C")
+
+x=5;
+if(x>3){
+  print
+  ("x > 3");
+}else{
+  print
+  ("x <= 3");
+}
+
+if(x>3) print("x>3") else print("x<=3")
+
+test = ifelse(x>3,"x > 3","x <= 3")  #ifelse(條件, true, false)
+test
+
+x=5;
+if(x>3){
+  print ("x > 3");
+} else if (x ==3){
+  print ("x == 3");
+}else{
+  print
+  ("x <= 3");
+}
+
+switch(2,print("aaa"),print("bbb"),print("ccc"))   
+#switch(條件(idx,name), case1, case2 ...)
+switch("third",first=print("aaa"),second=print("bbb"),third=print("ccc"))
+
+for(i in 1:10){
+  print(i);
+}
+
+sum=0
+for(i in 1:100){
+  sum= sum+ i;
+}
+sum
+
+sum(1:100)
+
+
+sum = 0;
+cnt = 0;
+while(cnt <= 100){
+  sum = sum + cnt;
+  cnt = cnt + 1;
+}
+sum
+
+mat = matrix(1:9, byrow=TRUE, nrow=3) 
+1:nrow(mat)   #vector
+seq(1,nrow(mat))
+for(i in seq_len(nrow(mat))) {
+  for(j in seq_len(ncol(mat))) { 
+    print(mat[i, j])
+  }
+}
+#9*9
+mat = matrix(1:81,nrow=9)
+for(i in 1:9){
+    for(j in 1:9){
+      mat[i,j] = i*j
+        print(mat)
+    }
+}
+
+```
+
+##Function
+```{R}
+f = function(a){    # function assign f ; use f() to erun
+    print(a+3)
+}
+
+f1 = function(a = 3) { 
+    return(a+3)
+}
+
+f2 = function(a, b = 2, c = NULL) {  #default args
+   return(b + 1)
+}
+
+b = 3
+f3 = function(a) {
+    b = 2
+    return(b)
+}
+
+f4 = function(a,b){
+    if(a > 3){
+       a = 100;
+    }
+    return(a + b);
+}
+```
+
+##迴圈函式: lapply(套用到list) , sapply , apply(套用到陣列) , tapply(向量)
+#2個list , matrix , vector 去做運算
+```{R}
+#lapply
+grades =list(kevin = c(80,60,92), marry = c(56,75,64,84,56), QOO = c(10,20,3,4,10))
+
+lapply(grades, sum)
+lapply(grades,function(e){sum(e)})      #every element to sum
+lapply(grades, mean)
+lapply(grades, function(e){list(sum = sum(e), min = min(e))})
+
+m1 = matrix(1:4, byrow=TRUE, nrow=2)
+m2 = matrix(5:8, byrow=TRUE, nrow=2)
+
+li = list(m1, m2)             #use list to join matrix
+lapply(li, mean)
+
+class(lapply(grades, sum))
+#sapply
+sapply(grades, sum)
+class(sapply(grades, sum))
+
+m1 = matrix(1:4, byrow=TRUE, nrow=2)
+m2 = matrix(5:8, byrow=TRUE, nrow=2)
+li = list(m1, m2)
+sapply(li, mean)
+sapply(li,function(e) e[1,])
+#apply
+m = matrix(1:4, byrow=TRUE, nrow=2)
+apply(m, 1, sum) # rowsums   (data,row;col,sum)
+apply(m, 2, sum) # colsums
+
+apply(m, 1, mean) # rowmeans
+apply(m, 2, mean) # colmeans
+#tapply
+x = c(80,70,59,88,72,57)
+t = c(1,1,2,1,1,2)
+tapply(x,t, mean)
+
+data(iris)
+
+tapply(iris$Sepal.Length, iris$Species, mean)
+
+```
+
+# Descriptive Statistics
+##表格
+```{R}
+#import data
+getwd()
+#setwd("~/lecture/riii")
+load("Statistics/cdc.Rdata")   #.Rdata  use load and save
+save()
+str(cdc)
+head(cdc)
+names(cdc)
+
+#轉換資料類型  #類別型(0,1)可以用Factor整理  use table() present
+cdc$exerany = as.factor(cdc$exerany)   #vector(num) => factor
+cdc$hlthplan = as.factor(cdc$hlthplan)
+cdc$smoke100 = as.factor(cdc$smoke100)
+
+str(cdc)
+
+#一維次數分配表   同維度 去做分配
+table(cdc$exerany)
+
+#相對比例
+table(cdc$exerany) / length(cdc$exerany)
+
+#二維次數分配表
+table(cdc$gender,cdc$exerany)    #加入性別維度
+
+#連續型資料作表   #連續型可以用"離散整理"
+table(cdc$height)      # key : val
+summary(cdc$height)    #取摘要
+cut(cdc$height,seq(45,95,by=5)) #default ( ]
+        #use cut to take target
+# 包含上界]  不包含下界(
+table(cut(cdc$height,seq(45,95,by=5),right=T))
+
+#包含下界[   不包含上界)
+table(cut(cdc$height,seq(45,95,by=5),right=F)) 
+table(cut(cdc$height,seq(45,95,by=5),right=F,labels=seq(1,length(seq(45,95,by=5))-1)))   #labels   標籤     length(seq(45,95,by=5))=11
+cdc$h_group = cut(cdc$height,seq(45,95,by=5),right=F)
+str(cdc)
+
+```
+
+##統計圖
+```{R}
+#屬貭資料: 長條圖、圓餅圖 (只有類別，不能以數值區分的資料(類別型資料))
+barplot(table(cdc$smoke100)) #類別型資料用table() to present
+?barplot
+barplot(table(cdc$smoke100),xlab='有無吸菸',ylab='人數',main='title',col='blue')
+
+pie(table(cdc$smoke100))   #類別型資料用table() to present
+pie(table(cdc$genhlth))
+pie(table(cdc$genhlth),col = rainbow(5))
+
+#加上各分類比例
+pct = round(table(cdc$genhlth) / length(cdc$genhlth) *100,1)  #pct is table
+labels = paste(names(pct),pct,"%")     #重新定義標籤
+pie(table(cdc$genhlth), labels = labels)
+
+gender_smokers = table(cdc$gender,cdc$smoke100)
+mosaicplot(gender_smokers)   #馬賽克
+
+#屬量資料: 直方圖、盒鬚圖、莖葉圖 (以數值來表示的資料(連續型資料))
+hist(cdc$age)
+
+par(mfrow=c(3,1))   #Plots的區塊=>row=3  col=1
+hist(cdc$height)
+hist(cdc$height,breaks = 30)
+hist(cdc$height,breaks = 50)   #breaks 區間密度
+#經葉圖
+cdc$age
+stem(cdc$age)   
+tmp=sample(cdc$age,100)
+stem(sample(cdc$age,100))
+?stem
+stem(sample(cdc$age,100),scale=2)
+
+cdc$weight
+boxplot(cdc$weight)
+boxplot(cdc$weight, horizontal=TRUE)
+par(mfrow=c(1,1))                #Plots的區塊=>row=1  col=1
+boxplot(cdc$weight ~ cdc$gender)#要被分組的data~類別
+boxplot(cdc$height ~ cdc$gender)
+
+bmi = (cdc$weight/cdc$height^2) * 703
+boxplot(bmi ~ cdc$genhlth)   
+
+#觀察兩組資料間關係:點散布圖
+plot(cdc$weight, cdc$height)
+plot(cdc$weight, cdc$wtdesire)
+
+
+png(filename='test123.png')
+plot(cdc$weight, cdc$height)
+dev.off()
+
+```
+
+##統計量
+mean or median? - https://udn.com/news/story/10560/2091550
+```{R}
+#集中量數:mean median mode
+
+a = c(100,120,130,110,100,90,80,90,100,110)
+sum(a) / 10
+mean(a)
+
+#有極端值 outliers  用中位數(median)衡量
+b = c(a, 10000)
+mean(b)
+
+a
+sort(a)
+median(a)
+
+sort(b)
+median(b)
+#眾數
+table(c(1,4,4,3))       #次數分類表
+which.max(table(c(1,4,4,3)))
+names(which.max(table(c(1,4,4,3))))
+
+mean(cdc$weight)          #平均值
+median(cdc$weight)        #中位數
+table(cdc$h_group)
+names(which.max(table(cdc$h_group)))
+
+#離差量數:range IQR variance stardard deviation
+
+a = c(173,162,150,160,155,168,171,185,175,178,182)
+sort(a)
+range(a)                     #length(range(a))=2
+range(a)[2] - range(a)[1]   #全距
+quantile(a,0.5)
+quantile(a,0.25)   #第一四分位距
+quantile(a,0.75)   #第三四分位距
+quantile(a,0.75) - quantile(a,0.25)   #interquartile range, IQR(四分位距)
+IQR(a)
+fivenum(a)
+summary(a)
+boxplot(a,horizontal = T)
+
+b = c(a,226)  #outliers 離群值影響IQR
+range(b)
+IQR(b)
+boxplot(b,horizontal = T)
+
+var(cdc$weight)         #變異數 S^2
+sqrt(var(cdc$weight))   #標準差
+sd(cdc$weight)
+```
+
+##package:ggplot2
+documentation
+- http://docs.ggplot2.org/current/
+
+cheat sheet
+- https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
+
+why ggplot2?
+- fancy by default, good for demo and report 
+- consistent across all kinds of plot in syntax and behavior
+- strong support community(the mostly download package on CRAN)
+```{R}
+#basic syntax
+#*****ggplot(data,aes(x,y,group,...))+geom_object(...)*****
+install.packages('ggplot2')
+library('ggplot2')
+#geom_point()       X, Y
+g <- ggplot(cdc,aes(x=height,y=weight))  #畫布   
+g+geom_point(aes(col=exerany))   #col分類
+g+geom_point(aes(col=exerany))   #幾何圖形
+#geom_bar()         X
+g <- ggplot(cdc,aes(x=genhlth))
+g+geom_bar()
+g+geom_bar() + ylab('Count') + ggtitle('cdc')
+#fill => 填滿顏色; color => 邊線顏色
+g+geom_bar(fill='snow',color='black')
+
+g <- ggplot(cdc,aes(x=genhlth,fill=gender))  #fill use gender
+g+geom_bar()
+#g <- ggplot(cdc,aes(x=genhlth))
+#g+geom_bar(aes(fill=gender))
+#                  X, fill
+g_bygrp <- ggplot(cdc,aes(x=exerany,fill=genhlth))
+g_bygrp + geom_bar()
+par(mfrow=c(1,1))
+g_bygrp + geom_bar(position='stack')     #堆疊   
+g_bygrp + geom_bar(position='dodge')     #並列柱狀體
+g_bygrp + geom_bar(position='identity')  #起始點相同(適合面積圖)
+
+precounted = as.data.frame(table(cdc$genhlth,dnn = c('genhlth'))) #genhlth為標題的vector
+precounted
+ggplot(precounted,aes(x=genhlth,y=Freq))+ geom_bar(stat='identity')#使用已有的data
+#geom_boxplot()
+g <- ggplot(cdc,aes(x=genhlth,y=height))
+g + geom_boxplot()
+
+#facet
+#geom_histogram()
+g <- ggplot(cdc,aes(x=weight))
+g2 = g+ geom_histogram()+facet_wrap(~genhlth)#要被分組的data~類別
+
+ggsave(filename='your_file_name.png',plot = g2)
+
+```

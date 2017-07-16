@@ -1,0 +1,377 @@
+---
+title: "R_0509"
+author: "York Lin"
+date: "2017年5月09日"
+output: html_document
+---
+what is R?
+- https://zh.wikipedia.org/wiki/R%E8%AF%AD%E8%A8%80
+
+R vs Python?
+- https://www.datacamp.com/community/tutorials/r-or-python-for-data-analysis
+
+most popular programming language for analytics
+- http://www.kdnuggets.com/polls/2015/r-vs-python.html
+- http://www.kdnuggets.com/2016/06/r-python-top-analytics-data-mining-data-science-software.html
+
+Kaggle
+- https://www.kaggle.com/
+
+UCI dataset
+- https://archive.ics.uci.edu/ml/datasets.html
+
+##R intro
+Functional Programming
+```{r, echo=TRUE}
+x=1:5
+sum(x) 
+mean(x)
+var(x)
+sqrt(var(x))
+
+y = 10/3
+ceiling(y)
+floor(y)
+round(y)
+trunc(y)
+pi
+log(3)
+log2(3)
+abs(-3)
+sqrt(16)
+```
+
+##*****RDemo*****
+```{r RDemo, echo=TRUE}
+#使用範例資料
+data(anscombe)     #function(data.frame)
+#使用資料中x1,y1變數畫出點散布圖
+plot(y1 ~ x1, data = anscombe)          #分布圖
+
+#建立回歸模型並assign到lmfit變數中
+lmfit <- lm(y1~x1, data=anscombe)   # <-  =  '='    回歸分析
+#在點散佈圖上加上迴歸線
+abline(lmfit, col="red")  
+```
+
+##Basic type
+- numeric: 1,2,1.2
+- integer: 1L,2L,3L
+- character: "string"
+- logical: TRUE,FALSE,T,F
+- complex: 1+4i
+
+## Basic Objects
+atomic:
+(由相同資料型態組成)
+- vector
+- matrix
+- factor
+
+recursive:
+(可以有混合的資料型態)
+- dataframe
+- list
+
+##R basic command
+```{R}
+#文件查詢
+help(package="base")
+#help(package="packageName")
+?base:sum
+?sum
+#?functionName
+help.search("sum")
+??sum
+#??Document search
+
+#範例演釋
+demo()
+
+#使用內建資料集
+data()
+#data(資料集名稱)
+
+#看現有變數
+ls()
+#移除變數
+rm()
+#查看資料型態
+# difference between class, typeof, and mode
+#http://stackoverflow.com/questions/6258004/r-types-and-classes-of-variables
+class()   #class()  return 物件型態
+typeof()  #in memory 的儲存方式 
+mode()    #同上
+#查看資料"結構"
+str()
+
+str(c(1,2,3))
+```
+
+##Basic computing
+```{R, echo=TRUE}
+3+8
+3-8
+3*8
+3/8
+1/0
+11%%2
+3<4
+2==5
+T == TRUE
+```
+
+##Assignment
+```{R}
+a = 3
+a <- 5 # ( alt + - )
+assign("a",3)
+
+a / 2
+a = a / 2
+
+```
+
+##Vector 向量  儲存一維資料
+- R語言最基本的物件
+```{R, echo=TRUE}
+character(5)  ## character vector of length 5
+numeric(5)
+logical(5)
+x = c(1,2,3,7)    #4個元素的向量
+y= c(2,3,5,1)
+x+y
+x*y
+x - y
+x/y
+
+x + 10
+x + c(10)
+x + c(1,2)
+x + c(1,2,1,2)
+
+x == c(1,99,3,4)   #return logical
+
+c(1,2,3)
+c(2,T,3+0i,"one")     #character > complex > numeric > logical
+c(2,T,3+0i)
+c(c(1,2,3,4),c(5))   #combin
+
+x = c(1,2,3,4,NA)
+is.na(x)        #find missing data
+x[!is.na(x)]   #[]  資料塞選  保留true
+sum(x[!is.na(x)])
+sum(x)
+sum(x, na.rm=T)    #sum(args=numeric,cpmplex,na.rm=T)
+
+height_vec = c(180,169,173)
+height_vec
+names(height_vec) = c("Brian", "Toby", "Sherry")
+height_vec            #元素命名
+
+name_vec = c("Brian", "Toby", "Sherry")
+names(height_vec) = name_vec   #元素命名
+height_vec > 175
+height_vec / 100
+height_vec > 175 | height_vec < 170
+height_vec < 175 & height_vec > 170   #return logical
+
+#R 的index從1開始
+height_vec[c(1)] #index
+height_vec['Brian'] #variable name
+height_vec[height_vec > 175] #condition (boolean vector)
+##**Object用[] 來filter**
+```
+
+##seq()連續數列 & rep()重覆 & paste()合併
+```{R, echo=TRUE}
+1:20
+seq(1,20)  #連續數列
+20:1
+?seq
+seq(1,20,by=2)        #間距
+seq(1,20,length=2)    #長度
+
+
+rep(1,5)
+?rep
+rep(c(1,2), times=5)        #repeat(obj, times)
+rep(c(1,2), times=c(1,2))   #對應元素repeat次數
+rep(c(1,2), each=5)         #各repeat次數
+rep_len(c(1,2),5)           #rep(c(1,2),length.out=5)
+
+paste("the","big","bang","theory")  #join  combin
+paste("big","bang",sep="")
+paste("big","bang",sep=";")
+paste(c("big","bang"),1:4)           #兩個obj  join
+length(paste(c("big","bang"),1:4,collapse = "+" ))  #用分格符號將元素合成  len()=1
+```
+
+##Matrix   陣列  可存放多維資料
+```{R}
+matrix(1:9, byrow=TRUE, nrow=3)  #byrow  
+matrix(1:9, nrow=3)             #bycol
+kevin = c(85,73)
+marry = c(72,64)
+jerry = c(59,66)
+mat = matrix(c(kevin, marry, jerry), nrow=3, byrow= TRUE)
+colnames(mat) = c('first', 'second')          #names
+rownames(mat) = c('kevin', 'marry', 'jerry')
+mat
+
+# basic   mat[row,col]
+dim(mat)        #nrow  ncol  
+nrow(mat)
+ncol(mat)
+t(mat)          #transpose
+mat[1,]     #row
+mat[,1]     #col
+mat[1:2,]
+mat[c('kevin','jerry'),]            #mat[1:2,]
+mat[c('kevin','jerry'),'first']     #mat[1:2,1]
+rowSums(mat)
+colSums(mat)
+rowMeans(mat)
+colMeans(mat)
+
+# insert new value
+mat2 = rbind(mat, c(78,63))     #rbind() = in row bind
+rownames(mat2)[nrow(mat2)] = 'sam'  #nrow(mat2)=4
+mat2
+
+mat3 = cbind(mat2,c(82,77,70,64))  #cbind() = in col bind
+colnames(mat3)[ncol(mat3)] = 'third'  #ncol(mat3)=3
+mat3
+
+rowMeans(mat3)    #avg
+colMeans(mat3)
+
+
+# arithmetic  算數
+m1 = matrix(1:4, byrow=TRUE, nrow=2)
+m2 = matrix(5:8, byrow=TRUE, nrow=2)
+
+m1 + m2
+m1 - m2
+m1 * m2
+m1 / m2
+
+m1 %*% m2   #矩陣乘積
+
+```
+
+##Factor   因子  類別型資料
+```{R}
+# syntax
+weather= c("sunny","rainy", "cloudy", "rainy", "cloudy")
+class(weather)                      #字串向量
+weather_category = factor(weather)  #factor的預設排序是字母大小
+weather_category
+class(weather_category)
+# order
+temperature = c("Low", "High", "High", "Medium", "Low", "Medium")
+temperature_category = factor(temperature, order = TRUE, levels = c("Low", "Medium", "High"))    #order : 順序True   levels : 大小
+temperature_category
+temperature_category[3] > temperature_category[1]
+temperature_category[4] > temperature_category[3]
+
+# change levels name
+weather= c("s","r", "c", "r", "c")
+weather_factor = factor(weather)
+levels(weather_factor) = c("cloudy","rainy","sunny")
+weather_factor           #用levels()替換factor 元素
+```
+
+##Dataframe   混合資料型態
+```{R}
+name <- c("Joe", "Bob", "Vicky")      #col 1
+age <- c(28, 26, 34)                  #col 2 
+gender <- c("Male","Male","Female")   #col 3
+df <- data.frame(name, age, gender)
+class(df)
+str(df)
+
+
+data(iris)   #iris資料集
+head(iris)    #預設前6筆
+tail(iris)    #後6筆
+tail(iris, 10)   
+str(iris)
+
+iris[1:3,]
+iris[1:3,1]
+iris[1:3,"Sepal.Length"]
+head(iris[,1:2])
+iris$"Sepal.Length"   #$取欄位的向量
+#取前五筆包含length 及 width 的資料
+Five.Sepal.iris = iris[1:5, c("Sepal.Length","Sepal.Width")]
+#可以用條件做篩選
+setosa.data = iris[iris$Species=="setosa",1:5]
+                          #iris取colName=Species  val="setosa",col1:5
+str(setosa.data)
+
+#使用which 做資料篩選
+which(iris$Species=="setosa")
+
+#merge進行資料合併   
+flower.type = data.frame(Species = "setosa", Flower = "iris")
+merge(flower.type, iris[1:3,], by ="Species")   #by = FK
+
+df1 = data.frame(CustomerId = c(1:6), Product = c(rep("Toaster", 3), rep("Radio", 3)))
+df2 = data.frame(CustomerId = c(2, 4, 6), State = c(rep("Alabama", 2), rep("Ohio", 1)))
+
+#Inner join:
+merge(x = df1, y= df2, by="CustomerId")
+
+#Outer join: 
+merge(x = df1, y = df2, by = "CustomerId", all = TRUE)
+
+#Left outer: 以左邊為pK
+merge(x = df1, y = df2, by = "CustomerId", all.x = TRUE)
+
+#Right outer: 以右邊為pk
+merge(x = df1, y = df2, by = "CustomerId", all.y = TRUE)
+
+#Cross join:   6*3=18筆資料
+merge(x = df1, y = df2, by = NULL)
+
+#用order做資料排序 => new data.frame   以Sepal.Length為排序  decreasing =T 大到小
+#          obj use [ (條件), ] to filter
+iris[order(iris$Sepal.Length, decreasing = TRUE),]
+
+#資料轉換
+iris$Species_new <- ifelse(iris$Species %in% c("setosa"), "IsSetosa","Notsetosa")       #ifelse(判斷條件, true,false)       %in% = '=='
+str(iris)
+```
+
+##File read and write
+```{R}
+getwd()
+setwd("C:/riii")  #設定目前路徑  setWorkingDirestory
+tw2330 = read.csv("data/2330.csv", header=TRUE)   #csv default use "," to sep
+
+test.data = read.table("data/match.txt" ,header = FALSE, sep="|")  
+
+#table
+write.table(test.data, file = "data/test.txt" , sep = " ")  #(obj, path, sep)
+#csv
+write.csv(test.data, file = "data/test.csv")
+
+``` 
+
+##List
+```{R}
+item = list(thing="hat", size=8.25)   #(elementName, elementVal)
+item
+
+test = list(name="Toby", score = c(87,57,72))
+test$score
+test$score[2]
+
+flower= list(title="iris dataset", data= iris)  #(elementName, elementVal)
+class(flower)
+class(flower$data)
+class(flower$data$Sepal.Length)
+flower$data$Sepal.Length[1]   #numeric
+flower$data[1,"Sepal.Width"]
+```
