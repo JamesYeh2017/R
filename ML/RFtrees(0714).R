@@ -1,3 +1,8 @@
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("rattle")
+install.packages("AER")
+install.packages("randomForest")
 library(rpart)
 library(rpart.plot)
 library(rattle)
@@ -50,42 +55,99 @@ library(randomForest)
 # corr.bias=FALSE : 是否執行迴歸的偏異校正
 # keep.inbag=FALSE : 
 
+for(i in 1:ncol(traindata)){
+    if(is.na(traindata$residual_value[i])){
+      print(i)
+    }
+}
 
-# (1)載入creditcard資料集(包含1,319筆觀察測試，共有12個變數)
-data(CreditCard)
 
-# 假設我們只要以下欄位(card:是否核准卡片、、年齡信用貶弱報告數、收入(美金)、自有住宅狀況、往來年月)
-bankcard <- subset(CreditCard, select = c(card, reports, age, income, owner, months))
+library(RevoUtilsMath)
+#set multiThread = 4
+setMKLthreads(4)
+#config multThread = 4
+getMKLthreads()
+memory.size(max=32710)
 
-# 將是否核准卡片轉換為0/1數值
-bankcard$card <- ifelse(bankcard$card == "yes", 1, 0)
+library(readxl)
+data<- read_excel("C:/Users/BIG DATA/Desktop/DL/0722.xlsx")
+
+#install.packages("DMwR")
+library("DMwR")
+NewData <- knnImputation(data)   #knnInputation
+tail(data)
+
+car <- subset(data, select = c(brand,years,usingyears,model,type,tag_price,cc,engine,gasoline,max_hp,compression,transmission,trans_level,front_suspen,
+                                  back_suspen,brake,tire,kind,doors,price,source,color,mileage,location,posttime,type_number,certificate,residual_value))
 
 # 測試模型
 # 取得總筆數
-n <- nrow(bankcard)
+n <- nrow(car)
+n
 # 設定隨機數種子
 set.seed(101)
 # 將數據順序重新排列
-newbankcard <- bankcard[sample(n),]
+car <- car[sample(n),]
 
 # 取出樣本數的idx
 t_idx <- sample(seq_len(n), size = round(0.7 * n))
 
 # 訓練資料與測試資料比例: 70%建模，30%驗證
-traindata <- newbankcard[t_idx,]
-testdata <- newbankcard[ - t_idx,]
+traindata <- car[t_idx,]
+testdata <- car[ - t_idx,]
 
 # (2)跑隨機樹森林模型
 # importance=TRUE:是否計算每個模型中各屬性之重要值，資料型態為布林
 # proximity=TRUE:是否計算模型的鄰近矩陣，此參數搭配函數MDSplot()使用，資料型態為布林
 # ntree=500:表示森林中的樹木數量
-randomforestM <- randomForest(card ~ ., 
-                              data = traindata, 
+x = subset(car, select = c(brand,years,usingyears,model,type,tag_price,cc,engine,gasoline,
+                            max_hp,compression,transmission,trans_level,front_suspen,
+                            back_suspen,brake,tire,kind,doors,price,source,color,mileage,
+                            location,posttime,type_number,certificate))
+
+car$brand <- as.factor(car$brand)
+car$model <- as.factor(car$model)
+car$type <- as.factor(car$type)
+car$engine <- as.factor(car$engine)
+car$gasoline <- as.factor(car$gasoline)
+car$max_hp <- as.factor(car$max_hp)
+car$transmission <- as.factor(car$transmission)
+car$trans_level <- as.factor(car$trans_level)
+car$front_suspen <- as.factor(car$front_suspen)
+car$back_suspen <- as.factor(car$back_suspen)
+car$brake <- as.factor(car$brake)
+car$tire <- as.factor(car$tire)
+car$kind <- as.factor(car$kind)
+car$source <- as.factor(car$source)
+car$color <- as.factor(car$color)
+car$location <- as.factor(car$location)
+car$posttime <- as.factor(car$posttime)
+
+# randomforestM <- randomForest(x = x, 
+#                               y=car$residual_value,
+#                               replace=TRUE,
+#                               importane = T, 
+#                               proximity = T, 
+#                               do.trace = 100, 
+#                               ntree = 500)
+f <- residual_value~brand+years+usingyears+model+type+tag_price+cc+engine+gasoline+max_hp+compression+transmission+trans_level+front_suspen+back_suspen+brake+tire+kind+doors+price+source+color+mileage+location+posttime+type_number+certificate
+randomforestM <- randomForest(formula = f,
+                              data = traindata,
+                              replace=TRUE,
                               importane = T, 
                               proximity = T, 
                               do.trace = 100, 
-                              ntree = 500)
+                              ntree = 500,
+                              na.action=na.omit)
 randomforestM
+
+for(i in 1:nrow(traindata)){
+  if(traindata$residual_value[i] > | traindata$residual_value[i] < ){
+    traindata$residual_value[i] <- 0
+  }else if(traindata$residual_value[i] > | traindata$residual_value[i] < ){
+    traindata$residual_value[i] <- 1
+  }
+}
 
 # 錯誤率 : 利用OOB(Out Of Bag)運算出來的
 plot(randomforestM)
@@ -116,7 +178,7 @@ accuracy
 
 
 # 讀取檔案
-stud_math = read.csv("C:\\riii\\ML\\student-mat.csv", sep=";", header=TRUE) 
+stud_math = read.csv("E:\\Desk\\r_test\\data\\student-mat.csv", sep=";", header=TRUE) 
 summary(stud_math)
 
 # 第33個屬性G3(也就是最終成績)，把此分數分成A,B,C,D,F五個等級

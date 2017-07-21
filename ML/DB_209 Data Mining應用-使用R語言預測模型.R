@@ -185,57 +185,59 @@ cv.lars(x=x,y=prostate$lcavol,K=10)
 # library(AER)
 # ?Affairs
 data(Affairs, package="AER")
-summary(Affairs)
-table(Affairs$affairs)
-head(Affairs)
+summary(Affairs)            #Affairs = Y   
+table(Affairs$affairs)      #針對Y作判斷 38/601 = 6%       451/601=75%
+head(Affairs)              
 
 # add new column
-Affairs$ynaffair[Affairs$affairs > 0] <- 1
+Affairs$ynaffair[Affairs$affairs > 0] <- 1       #只要大於0次  就放1
 Affairs$ynaffair[Affairs$affairs == 0] <- 0
 Affairs$ynaffair <- factor(Affairs$ynaffair,
                            levels=c(0,1),
-                           labels=c("No","Yes"))
+                           labels=c("No","Yes"))     #轉成""factor""    "No" "Yes"
 table(Affairs$ynaffair)
 
 # logistic regression- consider all variables
-fit.full <- glm(ynaffair ~ gender + age + yearsmarried + children + religiousness + education + occupation + rating, data=Affairs, family=binomial())
+fit.full <- glm(ynaffair ~ gender + age + yearsmarried + children + religiousness + education + occupation + rating, 
+                data=Affairs, 
+                family=binomial())   #邏輯斯的模型
 
 summary(fit.full)
 
-# logistic regression- droped 4 variables
-fit.reduced <- glm(ynaffair ~ age + yearsmarried 
+# logistic regression- droped 4 variables　
+fit.reduced <- glm(ynaffair ~ age + yearsmarried     #去除較不顯著的變數
                    + religiousness 
                    + rating, 
                    data=Affairs, family=binomial())
 
 summary(fit.reduced)
 
-# model comparision
+# model comparision        使用anova的Chisq檢定    0.2108  變數差不多
 anova(fit.reduced, fit.full, test="Chisq")
 
 # interpreting the model parameters
-coef(fit.reduced)
+coef(fit.reduced)          
 
 # exponentiate to put the results on an odds scale
-exp(coef(fit.reduced))
+exp(coef(fit.reduced))     #指數e
 
-# confidence interval
+# confidence interval        #信賴區間
 exp(confint(fit.reduced))
 
 # sensitivity analysis for rating
-testdata <- data.frame(rating=c(1, 2, 3, 4, 5), age=mean(Affairs$age),
+testdata <- data.frame(rating=c(1, 2, 3, 4, 5), age=mean(Affairs$age),   # 1~5 , 1
                        yearsmarried=mean(Affairs$yearsmarried),
                        religiousness=mean(Affairs$religiousness))
 testdata
-testdata$prob <- predict(fit.reduced, newdata=testdata, type="response")
+testdata$prob <- predict(fit.reduced, newdata=testdata, type="response")  #response is pre Y
 testdata
 
 # sensitivity analysis for age
 testdata <- data.frame(rating=mean(Affairs$rating),
-                       age=seq(17, 57, 10),
+                       age=seq(17, 57, 10),            #17~57 , 10
                        yearsmarried=mean(Affairs$yearsmarried),
                        religiousness=mean(Affairs$religiousness))
 testdata
 testdata$prob <- predict(fit.reduced, newdata=testdata, type="response")
-testdata
+testdata                 #model  newdata  predictType
 # end
