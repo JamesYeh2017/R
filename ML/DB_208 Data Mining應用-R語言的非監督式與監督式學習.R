@@ -18,10 +18,10 @@ rattle()
 # scale 範例
 x <- matrix(1:10, ncol = 2)
 x
-apply(x, 2, mean) # 3,8
+apply(x, 2, mean) # (matrix, 1列2行, ?)  3,8
 apply(x, 2, sd)
-(x.scale1 <- scale(x, scale=FALSE))
-(x.scale <- scale(x)) # -2/1.581139=-1.264911
+(x.scale1 <- scale(x, scale=FALSE))  #X-mean(X)
+(x.scale <- scale(x)) # -2/1.581139=-1.264911     (X-平均數)/標準差
 
 # cut 範例
 cut(iris$Sepal.Length[1:10], breaks=3)
@@ -40,7 +40,7 @@ sample(5, 10, replace=TRUE) # bootstrap
 ind <- sample(2, nrow(iris), replace=TRUE, prob=c(0.7, 0.3))
 ind
 traindata <- iris[ind==1,]
-dim(traindata)
+dim(traindata)     #106列5行
 head(traindata)
 
 testdata <- iris[ind==2,]
@@ -150,7 +150,7 @@ sel <- plot(Groceries.ar, measure=c("support", "lift"),
 sel
 inspect(sel)
 
-# K-means演算法範例操作 -----
+#----- K-means演算法範例操作 -----
 ?iris
 
 # 認識 kmeans 函數
@@ -159,32 +159,33 @@ inspect(sel)
 irisnew <- iris
 irisnew$Species <- NULL
 
-irisnew.kcluster <- kmeans(irisnew, 3)
-irisnew.kcluster
+irisnew.kcluster <- kmeans(irisnew, 3)  #資料集 分群個數
+irisnew.kcluster     #  50, 38, 62  分群個數
 
-irisnew.kcluster$totss
-irisnew.kcluster$withinss
-irisnew.kcluster$tot.withinss
-irisnew.kcluster$betweenss
+irisnew.kcluster$totss      #整體平方合
+irisnew.kcluster$withinss   #各群的組內平方合
+irisnew.kcluster$tot.withinss  #越小越好
+irisnew.kcluster$betweenss     #越大越好
 
 plot(irisnew[c("Sepal.Length", "Sepal.Width")], 
      col=irisnew.kcluster$cluster) # col: 1黑,2紅,3綠
 points(irisnew.kcluster$centers[,c("Sepal.Length", "Sepal.Width")], 
-       col=1:3, pch=8, cex=3)
+       col=1:3, pch=8, cex=3)        #畫出中心點  pch選擇point的圖案  cex放大
 
 # 階層式演算法範例操作 -----
-idx <- sample(1:dim(iris)[1], 40)
+?hclust
+idx <- sample(1:dim(iris)[1], 40)  #母體  樣本數
 irisSample <- iris[idx,]
 irisSample$Species <- NULL
 
-iris.hc <- hclust(dist(irisSample), method="ave")
-names(iris.hc)
-iris.hc$height
+iris.hc <- hclust(dist(irisSample), method="ave")  #dist計算相鄰矩陣
+names(iris.hc)  #了解物件名稱
+iris.hc$height  #各物件相關特性
 
-plot(iris.hc , labels=iris$Species[idx])
+plot(iris.hc , labels=iris$Species[idx])  #
 
-plot(iris.hc , hang = -1, labels=iris$Species[idx])
-rect.hclust(iris.hc, k=3, border="red")
+plot(iris.hc , hang = -1, labels=iris$Species[idx])  #hang -1  顯示直排文字對齊
+rect.hclust(iris.hc, k=3, border="red")   #3個矩形
 
 # 決策樹 rpart 套件 -----
 
@@ -195,43 +196,43 @@ credit <- read.csv("http://web.ydu.edu.tw/~alan9956/rdata/credit.csv")
 names(credit)
 str(credit)
 head(credit, n=3)
-
+#連續型轉成離散型
 levels(credit$checkingstatus1) <- c("<= 0 DM","1-200 DM", "> 200 DM", "unknown")
 table(credit$checkingstatus1)
 
 levels(credit$savings) <- c("< 100 DM","100 <= saving < 500 DM", "500 <= saving < 1000 DM", "<= 1000 DM", "no saving")
 table(credit$savings)
 
-summary(credit$duration)   #利用summary查看樹執行的data
+summary(credit$duration)   #利用summary查看col分布
 summary(credit$amount)
 
 credit$Default <- as.factor(credit$Default)  #label轉換成因子
-levels(credit$Default) <- c("no","yes")      #
-table(credit$Default)
+levels(credit$Default) <- c("no","yes")      
+table(credit$Default)                        #利用table查看data分布
 
 # split into training and test subsets
 set.seed(168)
-ind <- sample(2, nrow(credit), replace=TRUE, prob=c(0.7, 0.3))
+ind <- sample(2, nrow(credit), replace=TRUE, prob=c(0.7, 0.3))#2顆球重複抽
 trainData <- credit[ind==1,]
 testData <- credit[ind==2,]
 
 # train a decision tree
 library(rpart)
 myFormula <- Default ~ .
-credit_rpart <- rpart(myFormula, data=credit, control=rpart.control(minsplit = 10))
-attributes(credit_rpart)
+credit_rpart <- rpart(myFormula, data=credit, control=rpart.control(minsplit = 10)) #10個data集才能分割
+attributes(credit_rpart)  #屬性名稱
 
-print(credit_rpart)
+print(credit_rpart)       #cp錯誤比例  xerror交叉驗證
 print(credit_rpart$cptable)
 plot(credit_rpart)
-text(credit_rpart)
+text(credit_rpart)       #補上值名稱
 text(credit_rpart, use.n=TRUE)
 
 # prune the tree
 opt <- which.min(credit_rpart$cptable[,"xerror"])
 cp.prune <- credit_rpart$cptable[opt, "CP"]
-cp.prune
-credit_prune <- prune(credit_rpart, cp=cp.prune)
+cp.prune    
+credit_prune <- prune(credit_rpart, cp=cp.prune)  #prune修剪
 
 print(credit_prune)
 plot(credit_prune)

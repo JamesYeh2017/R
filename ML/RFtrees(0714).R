@@ -142,10 +142,46 @@ randomforestM <- randomForest(formula = f,
 randomforestM
 
 for(i in 1:nrow(traindata)){
-  if(traindata$residual_value[i] > | traindata$residual_value[i] < ){
+  if(traindata$residual_value[i] > 0| traindata$residual_value[i] < 5){
     traindata$residual_value[i] <- 0
-  }else if(traindata$residual_value[i] > | traindata$residual_value[i] < ){
+  }else if(traindata$residual_value[i] > 5| traindata$residual_value[i] < 10){
     traindata$residual_value[i] <- 1
+  }else if(traindata$residual_value[i] > 10| traindata$residual_value[i] < 15){
+    traindata$residual_value[i] <- 2
+  }else if(traindata$residual_value[i] > 15| traindata$residual_value[i] < 20){
+    traindata$residual_value[i] <- 3
+  }else if(traindata$residual_value[i] > 20| traindata$residual_value[i] < 25){
+    traindata$residual_value[i] <- 4
+  }else if(traindata$residual_value[i] > 25| traindata$residual_value[i] < 30){
+    traindata$residual_value[i] <- 5
+  }else if(traindata$residual_value[i] > 30| traindata$residual_value[i] < 35){
+    traindata$residual_value[i] <- 6
+  }else if(traindata$residual_value[i] > 35| traindata$residual_value[i] < 40){
+    traindata$residual_value[i] <- 7
+  }else if(traindata$residual_value[i] > 40| traindata$residual_value[i] < 45){
+    traindata$residual_value[i] <- 8
+  }else if(traindata$residual_value[i] > 45| traindata$residual_value[i] < 50){
+    traindata$residual_value[i] <- 9
+  }else if(traindata$residual_value[i] > 50| traindata$residual_value[i] < 55){
+    traindata$residual_value[i] <- 10
+  }else if(traindata$residual_value[i] > 55| traindata$residual_value[i] < 60){
+    traindata$residual_value[i] <- 11
+  }else if(traindata$residual_value[i] > 60| traindata$residual_value[i] < 65){
+    traindata$residual_value[i] <- 12
+  }else if(traindata$residual_value[i] > 65| traindata$residual_value[i] < 70){
+    traindata$residual_value[i] <- 13
+  }else if(traindata$residual_value[i] > 70| traindata$residual_value[i] < 75){
+    traindata$residual_value[i] <- 14
+  }else if(traindata$residual_value[i] > 75| traindata$residual_value[i] < 80){
+    traindata$residual_value[i] <- 15
+  }else if(traindata$residual_value[i] > 80| traindata$residual_value[i] < 85){
+    traindata$residual_value[i] <- 16
+  }else if(traindata$residual_value[i] > 85| traindata$residual_value[i] < 90){
+    traindata$residual_value[i] <- 17
+  }else if(traindata$residual_value[i] > 90| traindata$residual_value[i] < 95){
+    traindata$residual_value[i] <- 18
+  }else if(traindata$residual_value[i] > 95| traindata$residual_value[i] < 100){
+    traindata$residual_value[i] <- 19
   }
 }
 
@@ -173,116 +209,4 @@ cm[1] / sum(cm[, 1])
 # 整體準確率(取出對角/總數)
 accuracy <- sum(diag(cm)) / sum(cm)
 accuracy
-
-
-
-
-# 讀取檔案
-stud_math = read.csv("E:\\Desk\\r_test\\data\\student-mat.csv", sep=";", header=TRUE) 
-summary(stud_math)
-
-# 第33個屬性G3(也就是最終成績)，把此分數分成A,B,C,D,F五個等級
-tmp=0 
-for(i in 1:395){
-  if(stud_math[i,33] > 15)tmp[i] = "A"
-  else if(stud_math[i,33] > 13)tmp[i] = "B"
-  else if(stud_math[i,33] > 11)tmp[i] = "C"
-  else if(stud_math[i,33] > 9)tmp[i] = "D"
-  else tmp[i]="F"
-}
-
-# 把分好等級之結果存進stud_math
-stud_math[,33] = factor(tmp) 
-# colnames(stud_math)[colnames(stud_math) == "V34"] <- "Grade"
-names(stud_math)[33]<-"Grade"
-# 印出Grade屬性中各等級的資料筆數
-summary(stud_math$Grade) 
-# 取90%為訓練資料
-num_train_data = ceiling(0.9*nrow(stud_math)) 
-# 印出訓練資料之筆數
-num_train_data 
-
-# 隨機選取
-stud_math.train = sample(1:nrow(stud_math),num_train_data) 
-# 印出選到第幾筆為訓練資料
-print(stud_math.train) 
-
-# 一個參數(Grade~.):表示除了Grade屬性之外，其他屬性皆為模型之引數(因為我們要預測Grade呀~)
-# 第二個參數(data=stud_math):表示模型中含有變數的一組資料
-# 第三個參數(importance=TRUE):是否計算每個模型中各屬性之重要值，資料型態為布林
-# 第四個參數(proximity=TRUE):是否計算模型的鄰近矩陣，此參數搭配函數MDSplot()使用，資料型態為布林
-# 第五個參數(ntree=500):表示森林中的樹木數量
-# 第六個參數(subset=stud_math.train):表示選出的訓練集資料為第幾筆(此參數的資料格式為向量)
-# 第七個參數(na.action = na.fail):表示遺漏值之處理，na.fail表示不能出現遺漏值
-stud_math.rf=randomForest(Grade~., 
-                          data=stud_math,
-                          importance=TRUE,
-                          proximity=TRUE,
-                          ntree=500,
-                          subset=stud_math.train, 
-                          na.action = na.fail)
-
-print(stud_math.rf)
-importance(stud_math.rf)
-
-MDSplot(stud_math.rf, stud_math$Grade)
-MDSplot(stud_math.rf, stud_math$Grade, palette = rep(1,5))
-MDSplot(stud_math.rf, stud_math$Grade, pch = as.numeric(stud_math$Grade))
-MDSplot(stud_math.rf, stud_math$Grade, palette = rep(1,5), pch = as.numeric(stud_math$Grade))
-round(importance(stud_math.rf), 2)
-
-# 利用importance()函數，
-# 得到MeanDecreaseAccuracy與MeanDecreaseGini，
-# 值愈高就表示該屬性對於該模型的判別影響愈大，
-# 可以做為後續利用其他演算法建模時刪減屬性的依據。
-
-
-
-# 增加mtry參數，隨機選取分隻屬性個數
-# 取33-1=32個屬性，即扣掉要預測的G3(Grade)
-n = ncol(stud_math) - 1 
-model_err_rate = 1
-for(i in 1:n){
-  result = randomForest(Grade~.,
-  data = stud_math,
-  mtry = i,
-  importance = TRUE,
-  ntree = 500)
-  model_err_rate[i] = mean(result$err.rate)
-  cat("第",i,"個模型:",model_err_rate[i],"\n")
-}
-
-mtry_value = which.min(model_err_rate)
-cat("mtry參數設定為:", mtry_value)
-
-stud_math.rf = randomForest(Grade~.,
-                          data = stud_math,
-                          mtry = mtry_value,
-                          importance = TRUE,
-                          proximity = TRUE,
-                          ntree = 500)
-
-print(stud_math.rf)
-importance(stud_math.rf)
-
-MDSplot(stud_math.rf, stud_math$Grade)
-MDSplot(stud_math.rf, stud_math$Grade, palette = rep(1,5))
-MDSplot(stud_math.rf, stud_math$Grade, pch = as.numeric(stud_math$Grade))
-MDSplot(stud_math.rf, stud_math$Grade, palette = rep(1,5), pch = as.numeric(stud_math$Grade))
-round(importance(stud_math.rf), 2)
-
-# 利用importance()函數，
-# 得到MeanDecreaseAccuracy與MeanDecreaseGini，
-# 值愈高就表示該屬性對於該模型的判別影響愈大，
-# 可以做為後續利用其他演算法建模時刪減屬性的依據。
-
-
-
-
-
-
-
-
-
-
 
