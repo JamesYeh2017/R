@@ -229,10 +229,10 @@ text(credit_rpart)       #補上值名稱
 text(credit_rpart, use.n=TRUE)
 
 # prune the tree
-opt <- which.min(credit_rpart$cptable[,"xerror"])
-cp.prune <- credit_rpart$cptable[opt, "CP"]
+opt <- which.min(credit_rpart$cptable[,"xerror"])   #找出最小值的idx
+cp.prune <- credit_rpart$cptable[opt, "CP"]        #刪除cp欄位的最小值
 cp.prune    
-credit_prune <- prune(credit_rpart, cp=cp.prune)  #prune修剪
+credit_prune <- prune(credit_rpart, cp=cp.prune)  #prune修剪  降低overfit
 
 print(credit_prune)
 plot(credit_prune)
