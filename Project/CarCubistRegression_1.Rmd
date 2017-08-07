@@ -1,0 +1,78 @@
+---
+title: "CarCubistRession"
+author:"Alan Huang"
+---
+
+library(readr)
+#file location
+X0717AnalyticData_edit5 <- read_csv("C:/Users/Java/Desktop/0717AnalyticData_test.csv")
+
+
+#類別變數有類別上限
+#file column judge
+mod1 <- cubist(x = X0717AnalyticData_edit5[, -9], y =X0717AnalyticData_edit5$residual)
+
+#sample數足夠 可依狀況調整(0.3以上會跑太久)
+set.seed(1)
+inTrain <- sample(1:nrow(X0717AnalyticData_edit5), floor(.6*nrow(X0717AnalyticData_edit5)))
+#inTrain <- sample(1:nrow(X0717AnalyticData_edit5), floor(.8*nrow(X0717AnalyticData_edit5)))
+
+trainingPredictors <- X0717AnalyticData_edit5[ inTrain, -4]
+testPredictors <- X0717AnalyticData_edit5[-inTrain, -4]
+
+trainingOutcome <- X0717AnalyticData_edit5$residual[ inTrain]
+testOutcome <- X0717AnalyticData_edit5$residual[-inTrain]
+
+## 跑cubist迴歸樹
+modelTree <- cubist(x = trainingPredictors, y = trainingOutcome)
+
+##得到迴歸結果
+modelTree
+summary(modelTree)
+
+##以實驗model tree去對test群做迴歸預測
+mtPred <- predict(modelTree, testPredictors)
+
+## Test set RMSE  均方根誤差
+sqrt(mean((mtPred - testOutcome)^2))
+
+## Test set R^2  絕對係數
+cor(mtPred, testOutcome)^2
+
+#========進階 使用Committee樹==========
+set.seed(1)
+#設定 5model去跑, 下方為秀結果
+committeeModel <- cubist(x = trainingPredictors, y = trainingOutcome,committees = 5)
+summary(committeeModel)
+
+cmPred <- predict(committeeModel, testPredictors)
+# RMSE
+sqrt(mean((cmPred - testOutcome)^2))
+
+# R^2  
+cor(cmPred, testOutcome)^2
+
+#===Instance–Based Corrections多使用近鄰法修正====
+instancePred <- predict(committeeModel, testPredictors, neighbors = 5)
+# RMSE
+sqrt(mean((instancePred - testOutcome)^2))
+
+# R^2
+cor(instancePred, testOutcome)^2
+
+#=======使用caret 多方調整參數=======
+#過程再研究
+library(caret)
+set.seed(1)
+cTune <- train(x = trainingPredictors, y = trainingOutcome,"cubist",tuneGrid = expand.grid(committees = c(1, 10, 50, 100),neighbors = c(0, 1, 5, 9)),trControl = trainControl(method = "cv"))
+cTune
+##會直接告訴最佳解!
+## paintting!
+plot(cTune)
+
+##Variable Importance 
+summary(modelTree)
+modelTree$usage
+
+
+

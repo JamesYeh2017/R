@@ -1,0 +1,98 @@
+---
+title: "Cubist_BostonHousing"
+author: "Fly"
+date: "2017年6月18日"
+output: html_document
+---
+
+#importdata
+
+#cubist(x, y,committees = 1,control = cubistControl(), ...)
+#Arguments
+#Committees an integer: how many committee models (e.g.. boosting iterations) should be
+# used? control options that control details of the cubist algorithm. See cubistControl
+#... optional arguments to pass (not currently used)
+
+library(mlbench)
+data(BostonHousing)
+install.packages("Cubist")
+library(Cubist)
+
+##if error:Loading required package: lattice:   值接從右邊選擇比較穩
+install.packages("lattice", .Library)
+
+##if error:there is no package called ‘Rcpp’ ;then input:
+install.packages("Rcpp",dep=T)
+
+## 設定需求欄位x,y
+## Be careful:column name should not be too long
+mod1 <- cubist(x = BostonHousing[, -14], y = BostonHousing$medv)
+
+##　將臨河設為數據
+BostonHousing$chas <-as.numeric(BostonHousing$chas) - 1
+
+set.seed(1)
+inTrain <- sample(1:nrow(BostonHousing), floor(.8*nrow(BostonHousing)))
+
+trainingPredictors <- BostonHousing[ inTrain, -14]
+testPredictors <- BostonHousing[-inTrain, -14]
+
+trainingOutcome <- BostonHousing$medv[ inTrain]
+testOutcome <- BostonHousing$medv[-inTrain]
+
+## 跑cubist迴歸樹
+modelTree <- cubist(x = trainingPredictors, y = trainingOutcome)
+
+##得到迴歸結果
+modelTree
+summary(modelTree)
+
+##以實驗model tree去對test群做迴歸預測
+mtPred <- predict(modelTree, testPredictors)
+
+## Test set RMSE  均方根誤差
+sqrt(mean((mtPred - testOutcome)^2))
+
+## Test set R^2  絕對係數
+cor(mtPred, testOutcome)^2
+
+##========進階 使用Committee樹==========
+set.seed(1)
+committeeModel <- cubist(x = trainingPredictors, y = trainingOutcome,committees = 5)
+##上設定 5model去跑, 下方為秀結果
+summary(committeeModel)
+
+cmPred <- predict(committeeModel, testPredictors)
+
+## RMSE
+sqrt(mean((cmPred - testOutcome)^2))
+
+## R^2  結果都提升
+cor(cmPred, testOutcome)^2
+
+##===Instance–Based Corrections多使用近鄰法修正====
+instancePred <- predict(committeeModel, testPredictors, neighbors = 5)
+## RMSE
+sqrt(mean((instancePred - testOutcome)^2))
+
+## R^2
+cor(instancePred, testOutcome)^2
+
+=======使用caret 多方調整參數=======
+##過程有點怪
+library(caret)
+set.seed(1)
+cTune <- train(x = trainingPredictors, y = trainingOutcome,"cubist",tuneGrid = expand.grid(committees = c(1, 10, 50, 100),neighbors = c(0, 1, 5, 9)),trControl = trainControl(method = "cv"))
+cTune
+##會直接告訴最佳解!
+## paintting!!!
+plot(cTune)
+
+## 使用 lstat做為cubist 模型要素 ..發現對based model而言. 調整comittees無用
+lstat <- trainingPredictors[, "lstat", drop = FALSE]
+justRules <- cubist(x = lstat, y = trainingOutcome)
+andCommittees <- cubist(x = lstat, y = trainingOutcome, committees = 100)
+
+##Variable Importance 
+summary(modelTree)
+modelTree$usage

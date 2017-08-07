@@ -1,0 +1,85 @@
+---
+title: "CarRegression"
+author: "Fly"
+date: "2017年7月26日"
+output: html_document
+---
+library(mlbench)
+library("lattice", lib.loc="~/R/win-library/3.4")
+
+library(readr)
+Car_0 <- read_csv("C:/Users/Java/Desktop/CarPrice_0.csv")
+model.0 <-lm(residual_value~usingyears+mileage+certificate , data=Car_0)
+summary(model.0)
+
+#　刪離群值
+Car_00 <- boxplot(Car_0$mileage~Car_0$usingyears)
+Car_00
+Car_01 <- boxplot(Car_0$residual_value~Car_0$usingyears)
+Car_01
+
+#use the data with deleting outliers
+model.1 <-lm(residual_value~usingyears+mileage , data=Car_1)
+
+-------------cubist------------------
+Car_2 <- read_csv("C:/Users/Java/Desktop/CarPrice_2.csv")
+library(mlbench)
+library("lattice", lib.loc="~/R/win-library/3.4")
+library(Cubist)
+
+#file column judge
+mod1 <- cubist(x = X0717AnalyticData_edit5[, -10], y =X0717AnalyticData_edit5$residual)
+set.seed(1)
+inTrain <- sample(1:nrow(Car_2), floor(.6*nrow(Car_2)))
+trainingPredictors <- Car_2[ inTrain, -16]
+testPredictors <- Car_2[-inTrain, -16]
+
+trainingOutcome <- Car_2$residual_value[ inTrain]
+testOutcome <- Car_2$residual_value[-inTrain]
+modelTree1 <- cubist(x = trainingPredictors, y = trainingOutcome)
+
+mrPred2 <-predict(modelTree21,testPredictors)
+sqrt(mean((mtPred - testOutcome)^2))
+cor(mtPred, testOutcome)^2
+
+#========進階 使用Committee樹  ==========
+committeeModel2 <- cubist(x = trainingPredictors, y = trainingOutcome,committees = 5)
+summary(committeeModel2)
+
+cmPred2 <- predict(committeeModel2, testPredictors)
+# RMSE
+sqrt(mean((cmPred2 - testOutcome)^2))
+# R^2
+cor(instancePred, testOutcome)^2
+
+#===Instance–Based Corrections多使用近鄰法修正====
+instancePred <- predict(committeeModel2, testPredictors, neighbors = 5)
+# RMSE
+sqrt(mean((instancePred - testOutcome)^2))
+# R^2
+cor(instancePred, testOutcome)^2
+
+#=======使用caret 多方調整參數=======
+library(caret)
+set.seed(1)
+cTune <- train(x = trainingPredictors, y = trainingOutcome,"cubist",tuneGrid = expand.grid(committees = c(1, 10, 50, 80),neighbors = c(0, 1, 5, 9)),trControl = trainControl(method = "cv"))
+
+=====使用單一model altis====
+Car_3 <- read_csv("C:/Users/Java/Desktop/CarPrice_3.csv")
+mod3 <- cubist(x = Car_3[, -11], y =Car_3$residual_value)
+set.seed(1)
+inTrain <- sample(1:nrow(Car_3), floor(.8*nrow(Car_3)))
+trainingPredictors <- Car_3[ inTrain, -8]
+testPredictors <- Car_3[-inTrain, -8]
+trainingOutcome <- Car_3$residual_value[ inTrain]
+testOutcome <- Car_3$residual_valie[-inTrain]
+
+
+=====放網站單一brand=====
+Car_FORD <- read_csv("C:/Users/Java/Desktop/CarPrice_FORD.csv")
+mod_FORD <- cubist(x = Car_FORD[, -4], y =Car_FORD$residual_value)
+saveRDS(mod_FORD, file = "FORD",ascii = FALSE,version=NULL,compress = TRUE,refhook=NULL)
+
+#字串list型式
+#paste0('C:\\Program Files\\R\\R-3.4.0patched\\bin\\', brand)
+#modelTree = readRDS(paste0('C:\\Program Files\\R\\R-3.4.0patched\\bin\\', brand), refhook = FALSE)
